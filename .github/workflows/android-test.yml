@@ -32,9 +32,9 @@ jobs:
     - name: Setup Android SDK
       run: |
         export ANDROID_HOME=/usr/local/lib/android/sdk
-        export PATH=$PATH:$ANDROID_HOME/tools:$ANDROID_HOME/platform-tools
-        yes | sdkmanager --licenses
-        sdkmanager --install "platform-tools" \
+        export PATH=$PATH:$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools
+        echo "y" | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses
+        $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --install "platform-tools" \
                             "platforms;android-30" \
                             "build-tools;30.0.3" \
                             "system-images;android-30;google_apis;x86_64"
@@ -48,8 +48,8 @@ jobs:
     - name: Create AVD and start emulator
       run: |
         export ANDROID_HOME=/usr/local/lib/android/sdk
-        export PATH=$PATH:$ANDROID_HOME/tools:$ANDROID_HOME/platform-tools
-        echo "no" | avdmanager create avd -n test_avd -k "system-images;android-30;google_apis;x86_64" --force
+        export PATH=$PATH:$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools
+        echo "no" | $ANDROID_HOME/cmdline-tools/latest/bin/avdmanager create avd -n test_avd -k "system-images;android-30;google_apis;x86_64" --force
         $ANDROID_HOME/emulator/emulator -avd test_avd -no-audio -no-window -no-boot-anim -no-snapshot -gpu swiftshader_indirect &
         adb wait-for-device shell 'while [[ -z $(getprop sys.boot_completed) ]]; do sleep 1; done'
     
@@ -68,6 +68,6 @@ jobs:
     - name: Run Tests
       env:
         ANDROID_HOME: /usr/local/lib/android/sdk
-        PATH: ${{ env.PATH }}:$ANDROID_HOME/tools:$ANDROID_HOME/platform-tools
+        PATH: ${{ env.PATH }}:$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools
       run: |
         pytest tests/ -v 

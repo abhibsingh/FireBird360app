@@ -27,9 +27,12 @@ RUN mkdir -p ${ANDROID_HOME} && cd ${ANDROID_HOME} \
     && mkdir -p cmdline-tools/latest \
     && mv cmdline-tools/* cmdline-tools/latest/ || true \
     && mv cmdline-tools/latest cmdline-tools/ \
-    && yes | cmdline-tools/latest/bin/sdkmanager --licenses \
-    && cmdline-tools/latest/bin/sdkmanager "platform-tools" "platforms;android-30" "build-tools;30.0.3" \
-    && cmdline-tools/latest/bin/sdkmanager "system-images;android-30;google_apis;x86_64"
+    && echo "y" | ${ANDROID_HOME}/cmdline-tools/latest/bin/sdkmanager --licenses \
+    && ${ANDROID_HOME}/cmdline-tools/latest/bin/sdkmanager "platform-tools" "platforms;android-30" "build-tools;30.0.3" \
+    && ${ANDROID_HOME}/cmdline-tools/latest/bin/sdkmanager "system-images;android-30;google_apis;x86_64"
+
+# Update PATH to include Android tools
+ENV PATH=${PATH}:${ANDROID_HOME}/cmdline-tools/latest/bin:${ANDROID_HOME}/platform-tools
 
 # Install Appium
 RUN npm install -g appium@2.0.0 \
