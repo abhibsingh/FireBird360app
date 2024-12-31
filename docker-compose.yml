@@ -1,0 +1,11 @@
+version: '3'
+services:
+  appium-tests:
+    build: .
+    privileged: true
+    volumes:
+      - .:/app
+    environment:
+      - PYTHONUNBUFFERED=1
+    ports:
+      - "4723:4723" 

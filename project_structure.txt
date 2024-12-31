@@ -1,0 +1,11 @@
+appium-docker-tests/
+├── Dockerfile
+├── docker-compose.yml
+├── requirements.txt
+├── tests/
+│   ├── __init__.py
+│   ├── conftest.py
+│   └── test_artist360.py
+├── config/
+│   └── capabilities.json
+└── README.md 

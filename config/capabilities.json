@@ -1,0 +1,9 @@
+{
+  "platformName": "Android",
+  "deviceName": "test_avd",
+  "automationName": "UiAutomator2",
+  "appPackage": "com.firebird.artist360.uat",
+  "appActivity": "com.firebird.artist360.MainActivity",
+  "noReset": true,
+  "unicodeKeyboard": true
+} 
