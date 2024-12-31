@@ -34,4 +34,4 @@ def start_emulator():
 
 if __name__ == "__main__":
     appium_process = start_appium_server()
-    emulator_process = start_emulator() 
+    emulator_process = start_emulator()

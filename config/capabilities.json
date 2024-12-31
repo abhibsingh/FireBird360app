@@ -2,6 +2,7 @@
   "platformName": "Android",
   "deviceName": "test_avd",
   "automationName": "UiAutomator2",
+  "app": "/app/app.apk",
   "appPackage": "com.firebird.artist360.uat",
   "appActivity": "com.firebird.artist360.MainActivity",
   "noReset": true,

@@ -13,7 +13,7 @@ RUN apt-get update && apt-get install -y \
     git \
     python3 \
     python3-pip \
-    openjdk-11-jdk \
+    openjdk-17-jdk \
     nodejs \
     npm \
     usbutils \

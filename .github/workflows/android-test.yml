@@ -18,19 +18,26 @@ jobs:
       with:
         python-version: '3.x'
     
-    - name: Set up JDK
-      uses: actions/setup-java@v2
+    - name: Set up JDK 17
+      uses: actions/setup-java@v3
       with:
-        distribution: 'adopt'
-        java-version: '11'
+        distribution: 'temurin'
+        java-version: '17'
     
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
     
-    - name: Set up Android SDK
-      uses: android-actions/setup-android@v2
+    - name: Setup Android SDK
+      uses: android-actions/setup-android@v3
+      with:
+        cmdline-tools-version: '9.0'
+    
+    - name: Install Android SDK components
+      run: |
+        sdkmanager --install "platform-tools" "platforms;android-30" "build-tools;30.0.3" "system-images;android-30;google_apis;x86_64"
+        sdkmanager --licenses
     
     - name: Install Appium
       run: |
@@ -39,7 +46,6 @@ jobs:
     
     - name: Create AVD and start emulator
       run: |
-        sdkmanager "system-images;android-30;google_apis;x86_64"
         echo "no" | avdmanager create avd -n test_avd -k "system-images;android-30;google_apis;x86_64"
         nohup $ANDROID_HOME/emulator/emulator -avd test_avd -no-audio -no-window &
         adb wait-for-device
@@ -52,9 +58,10 @@ jobs:
     - name: Setup APK
       run: |
         mkdir -p app
-        # Download APK from Google Drive using wget or curl
-        wget -O app/your-app.apk "${{ secrets.APK_DOWNLOAD_URL }}" || \
-        curl -L -o app/your-app.apk "${{ secrets.APK_DOWNLOAD_URL }}"
+        # Download APK from secure URL if needed
+        if [ ! -z "${{ secrets.APK_DOWNLOAD_URL }}" ]; then
+          curl -L -o app/your-app.apk "${{ secrets.APK_DOWNLOAD_URL }}"
+        fi
     
     - name: Run Tests
       run: |
