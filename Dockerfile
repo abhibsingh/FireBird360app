@@ -21,10 +21,10 @@ RUN apt-get update && apt-get install -y \
 
 # Install Android SDK
 RUN mkdir -p ${ANDROID_HOME} && cd ${ANDROID_HOME} \
-    && wget https://dl.google.com/android/repository/commandlinetools-linux-8092744_latest.zip \
-    && unzip commandlinetools-linux-8092744_latest.zip \
-    && rm commandlinetools-linux-8092744_latest.zip \
-    && mkdir cmdline-tools/latest \
+    && wget https://dl.google.com/android/repository/commandlinetools-linux-8512546_latest.zip \
+    && unzip commandlinetools-linux-*.zip \
+    && rm commandlinetools-linux-*.zip \
+    && mkdir -p cmdline-tools/latest \
     && mv cmdline-tools/* cmdline-tools/latest/ || true \
     && mv cmdline-tools/latest cmdline-tools/ \
     && yes | cmdline-tools/latest/bin/sdkmanager --licenses \

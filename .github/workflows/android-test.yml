@@ -32,23 +32,30 @@ jobs:
     - name: Setup Android SDK
       uses: android-actions/setup-android@v3
       with:
-        cmdline-tools-version: '9.0'
+        cmdline-tools-version: '8.0'
+    
+    - name: Accept Android SDK licenses
+      run: |
+        yes | sdkmanager --licenses
     
     - name: Install Android SDK components
       run: |
-        sdkmanager --install "platform-tools" "platforms;android-30" "build-tools;30.0.3" "system-images;android-30;google_apis;x86_64"
-        sdkmanager --licenses
+        sdkmanager --install "platform-tools" \
+                            "platforms;android-30" \
+                            "build-tools;30.0.3" \
+                            "system-images;android-30;google_apis;x86_64"
     
     - name: Install Appium
       run: |
         npm install -g appium@2.0.0
         npm install -g appium-uiautomator2-driver
+        appium driver install uiautomator2
     
     - name: Create AVD and start emulator
       run: |
-        echo "no" | avdmanager create avd -n test_avd -k "system-images;android-30;google_apis;x86_64"
-        nohup $ANDROID_HOME/emulator/emulator -avd test_avd -no-audio -no-window &
-        adb wait-for-device
+        echo "no" | avdmanager create avd -n test_avd -k "system-images;android-30;google_apis;x86_64" --force
+        $ANDROID_HOME/emulator/emulator -avd test_avd -no-audio -no-window -no-boot-anim -no-snapshot -gpu swiftshader_indirect &
+        adb wait-for-device shell 'while [[ -z $(getprop sys.boot_completed) ]]; do sleep 1; done'
     
     - name: Start Appium Server
       run: |
@@ -58,7 +65,6 @@ jobs:
     - name: Setup APK
       run: |
         mkdir -p app
-        # Download APK from secure URL if needed
         if [ ! -z "${{ secrets.APK_DOWNLOAD_URL }}" ]; then
           curl -L -o app/your-app.apk "${{ secrets.APK_DOWNLOAD_URL }}"
         fi
