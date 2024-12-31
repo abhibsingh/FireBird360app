@@ -46,9 +46,6 @@ RUN pip3 install -r requirements.txt
 # Copy test files
 COPY . /app/
 
-# Copy the app APK (you'll need to provide this)
-COPY app.apk /app/app.apk
-
 # Install additional tools for emulator
 RUN apt-get update && apt-get install -y \
     qemu-kvm \

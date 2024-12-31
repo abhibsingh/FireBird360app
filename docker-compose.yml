@@ -5,7 +5,9 @@ services:
     privileged: true
     volumes:
       - .:/app
+      - ${APK_PATH}:${APK_PATH}
     environment:
       - PYTHONUNBUFFERED=1
+      - APK_PATH=${APK_PATH}
     ports:
       - "4723:4723" 

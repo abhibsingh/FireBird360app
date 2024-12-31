@@ -5,7 +5,11 @@ appium-docker-tests/
 ├── tests/
 │   ├── __init__.py
 │   ├── conftest.py
-│   └── test_artist360.py
+│   ├── test_login.py
+│   └── start_appium.py
 ├── config/
-│   └── capabilities.json
+│   ├── capabilities.json
+│   └── env_config.py
+├── .env.example
+├── .gitignore
 └── README.md 
