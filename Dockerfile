@@ -21,7 +21,7 @@ RUN apt-get update && apt-get install -y \
 
 # Install Android SDK
 RUN mkdir -p ${ANDROID_HOME} && cd ${ANDROID_HOME} \
-    && wget https://dl.google.com/android/repository/commandlinetools-linux-8512546_latest.zip \
+    && wget https://dl.google.com/android/repository/commandlinetools-linux-latest.zip \
     && unzip commandlinetools-linux-*.zip \
     && rm commandlinetools-linux-*.zip \
     && mkdir -p cmdline-tools/latest \
