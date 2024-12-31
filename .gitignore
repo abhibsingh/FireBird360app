@@ -115,3 +115,5 @@ secret.json
 *.apk
 *.aab
 !app/.gitkeep 
+*.apk
+app/
