@@ -32,12 +32,14 @@ jobs:
     - name: Setup Android SDK
       run: |
         export ANDROID_HOME=/usr/local/lib/android/sdk
-        export PATH=$PATH:$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools
+        export ANDROID_SDK_ROOT=/usr/local/lib/android/sdk
+        export PATH=$PATH:$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools:$ANDROID_HOME/emulator
         echo "y" | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses
         $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --install "platform-tools" \
                             "platforms;android-30" \
                             "build-tools;30.0.3" \
-                            "system-images;android-30;google_apis;x86_64"
+                            "system-images;android-30;google_apis;x86_64" \
+                            "emulator"
     
     - name: Install Appium
       run: |
@@ -45,13 +47,39 @@ jobs:
         npm install -g appium-uiautomator2-driver
         appium driver install uiautomator2
     
-    - name: Create AVD and start emulator
+    - name: Create and Start Android Emulator
       run: |
         export ANDROID_HOME=/usr/local/lib/android/sdk
-        export PATH=$PATH:$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools
-        echo "no" | $ANDROID_HOME/cmdline-tools/latest/bin/avdmanager create avd -n test_avd -k "system-images;android-30;google_apis;x86_64" --force
-        $ANDROID_HOME/emulator/emulator -avd test_avd -no-audio -no-window -no-boot-anim -no-snapshot -gpu swiftshader_indirect &
-        adb wait-for-device shell 'while [[ -z $(getprop sys.boot_completed) ]]; do sleep 1; done'
+        export ANDROID_SDK_ROOT=/usr/local/lib/android/sdk
+        export PATH=$PATH:$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools:$ANDROID_HOME/emulator
+        
+        # Accept licenses
+        echo "y" | sdkmanager --licenses
+        
+        # Create AVD
+        echo "no" | avdmanager create avd \
+          --name "test_avd" \
+          --package "system-images;android-30;google_apis;x86_64" \
+          --abi "x86_64" \
+          --device "pixel_2" \
+          --force
+        
+        # Start emulator
+        $ANDROID_HOME/emulator/emulator \
+          -avd test_avd \
+          -no-window \
+          -gpu swiftshader_indirect \
+          -no-snapshot \
+          -no-audio \
+          -no-boot-anim \
+          -camera-back none \
+          -camera-front none \
+          -qemu -cpu host &
+        
+        # Wait for device to be ready
+        adb wait-for-device
+        adb shell 'while [[ -z $(getprop sys.boot_completed) ]]; do sleep 1; done'
+        sleep 30  # Additional wait to ensure device is fully ready
     
     - name: Start Appium Server
       run: |
@@ -68,6 +96,7 @@ jobs:
     - name: Run Tests
       env:
         ANDROID_HOME: /usr/local/lib/android/sdk
-        PATH: ${{ env.PATH }}:$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools
+        ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
+        PATH: ${{ env.PATH }}:$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools:$ANDROID_HOME/emulator
       run: |
         pytest tests/ -v 

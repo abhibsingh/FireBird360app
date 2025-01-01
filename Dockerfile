@@ -3,7 +3,7 @@ FROM ubuntu:20.04
 ENV DEBIAN_FRONTEND=noninteractive
 ENV ANDROID_HOME=/opt/android-sdk
 ENV ANDROID_SDK_ROOT=/opt/android-sdk
-ENV PATH=$PATH:$ANDROID_HOME/tools:$ANDROID_HOME/tools/bin:$ANDROID_HOME/platform-tools
+ENV PATH=$PATH:$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools:$ANDROID_HOME/emulator
 
 # Install dependencies
 RUN apt-get update && apt-get install -y \
@@ -28,8 +28,12 @@ RUN mkdir -p ${ANDROID_HOME} && cd ${ANDROID_HOME} \
     && mv cmdline-tools/* cmdline-tools/latest/ || true \
     && mv cmdline-tools/latest cmdline-tools/ \
     && echo "y" | ${ANDROID_HOME}/cmdline-tools/latest/bin/sdkmanager --licenses \
-    && ${ANDROID_HOME}/cmdline-tools/latest/bin/sdkmanager "platform-tools" "platforms;android-30" "build-tools;30.0.3" \
-    && ${ANDROID_HOME}/cmdline-tools/latest/bin/sdkmanager "system-images;android-30;google_apis;x86_64"
+    && ${ANDROID_HOME}/cmdline-tools/latest/bin/sdkmanager \
+        "platform-tools" \
+        "platforms;android-30" \
+        "build-tools;30.0.3" \
+        "system-images;android-30;google_apis;x86_64" \
+        "emulator"
 
 # Update PATH to include Android tools
 ENV PATH=${PATH}:${ANDROID_HOME}/cmdline-tools/latest/bin:${ANDROID_HOME}/platform-tools
