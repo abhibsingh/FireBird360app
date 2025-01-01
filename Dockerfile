@@ -3,6 +3,7 @@ FROM ubuntu:20.04
 ENV DEBIAN_FRONTEND=noninteractive
 ENV ANDROID_HOME=/opt/android-sdk
 ENV ANDROID_SDK_ROOT=/opt/android-sdk
+ENV ANDROID_AVD_HOME=/root/.android/avd
 ENV PATH=$PATH:$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools:$ANDROID_HOME/emulator
 
 # Install dependencies
@@ -27,6 +28,9 @@ RUN mkdir -p ${ANDROID_HOME} && cd ${ANDROID_HOME} \
     && mkdir -p cmdline-tools/latest \
     && mv cmdline-tools/* cmdline-tools/latest/ || true \
     && mv cmdline-tools/latest cmdline-tools/ \
+    && mkdir -p ${ANDROID_HOME}/licenses \
+    && echo "24333f8a63b6825ea9c5514f83c2829b004d1fee" > ${ANDROID_HOME}/licenses/android-sdk-license \
+    && echo "d56f5187479451eabf01fb78af6dfcb131a6481e" >> ${ANDROID_HOME}/licenses/android-sdk-license \
     && echo "y" | ${ANDROID_HOME}/cmdline-tools/latest/bin/sdkmanager --licenses \
     && ${ANDROID_HOME}/cmdline-tools/latest/bin/sdkmanager \
         "platform-tools" \
@@ -34,6 +38,9 @@ RUN mkdir -p ${ANDROID_HOME} && cd ${ANDROID_HOME} \
         "build-tools;30.0.3" \
         "system-images;android-30;google_apis;x86_64" \
         "emulator"
+
+# Create AVD directory
+RUN mkdir -p ${ANDROID_AVD_HOME}
 
 # Update PATH to include Android tools
 ENV PATH=${PATH}:${ANDROID_HOME}/cmdline-tools/latest/bin:${ANDROID_HOME}/platform-tools

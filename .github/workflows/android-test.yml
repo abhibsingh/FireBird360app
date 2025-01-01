@@ -33,9 +33,17 @@ jobs:
       run: |
         export ANDROID_HOME=/usr/local/lib/android/sdk
         export ANDROID_SDK_ROOT=/usr/local/lib/android/sdk
+        export ANDROID_AVD_HOME=$HOME/.android/avd
         export PATH=$PATH:$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools:$ANDROID_HOME/emulator
-        echo "y" | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses
-        $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --install "platform-tools" \
+        
+        # Accept all licenses first
+        mkdir -p $ANDROID_HOME/licenses
+        echo "24333f8a63b6825ea9c5514f83c2829b004d1fee" > $ANDROID_HOME/licenses/android-sdk-license
+        echo "d56f5187479451eabf01fb78af6dfcb131a6481e" >> $ANDROID_HOME/licenses/android-sdk-license
+        
+        # Install required packages
+        yes | sdkmanager --licenses
+        sdkmanager --install "platform-tools" \
                             "platforms;android-30" \
                             "build-tools;30.0.3" \
                             "system-images;android-30;google_apis;x86_64" \
@@ -51,21 +59,22 @@ jobs:
       run: |
         export ANDROID_HOME=/usr/local/lib/android/sdk
         export ANDROID_SDK_ROOT=/usr/local/lib/android/sdk
+        export ANDROID_AVD_HOME=$HOME/.android/avd
         export PATH=$PATH:$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools:$ANDROID_HOME/emulator
         
-        # Accept licenses
-        echo "y" | sdkmanager --licenses
+        # Create AVD directory
+        mkdir -p $ANDROID_AVD_HOME
         
         # Create AVD
-        echo "no" | avdmanager create avd \
+        echo "no" | avdmanager --verbose create avd \
+          --force \
           --name "test_avd" \
           --package "system-images;android-30;google_apis;x86_64" \
-          --abi "x86_64" \
-          --device "pixel_2" \
-          --force
+          --tag "google_apis" \
+          --abi "x86_64"
         
         # Start emulator
-        $ANDROID_HOME/emulator/emulator \
+        nohup $ANDROID_HOME/emulator/emulator \
           -avd test_avd \
           -no-window \
           -gpu swiftshader_indirect \
@@ -74,12 +83,14 @@ jobs:
           -no-boot-anim \
           -camera-back none \
           -camera-front none \
+          -memory 2048 \
+          -accel on \
           -qemu -cpu host &
         
         # Wait for device to be ready
         adb wait-for-device
-        adb shell 'while [[ -z $(getprop sys.boot_completed) ]]; do sleep 1; done'
-        sleep 30  # Additional wait to ensure device is fully ready
+        adb shell 'while [[ -z $(getprop sys.boot_completed) ]]; do sleep 2; done'
+        sleep 30
     
     - name: Start Appium Server
       run: |
@@ -97,6 +108,7 @@ jobs:
       env:
         ANDROID_HOME: /usr/local/lib/android/sdk
         ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
+        ANDROID_AVD_HOME: ${{ github.workspace }}/.android/avd
         PATH: ${{ env.PATH }}:$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools:$ANDROID_HOME/emulator
       run: |
         pytest tests/ -v 
