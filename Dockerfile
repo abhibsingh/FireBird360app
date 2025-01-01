@@ -65,7 +65,11 @@ RUN apt-get update && apt-get install -y \
     qemu-kvm \
     libvirt-daemon-system \
     libvirt-clients \
-    bridge-utils
+    bridge-utils \
+    && addgroup --system kvm \
+    && adduser root kvm \
+    && chown root:kvm /dev/kvm \
+    && chmod 660 /dev/kvm
 
 # Start Appium and run tests
 CMD ["python3", "-m", "tests.start_appium.py"] 

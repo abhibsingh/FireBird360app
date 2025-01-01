@@ -29,6 +29,22 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
     
+    - name: Setup KVM
+      run: |
+        echo "Installing KVM dependencies..."
+        sudo apt-get update
+        sudo apt-get install -y \
+          qemu-kvm \
+          libvirt-daemon-system \
+          libvirt-clients \
+          bridge-utils
+        
+        echo "Configuring KVM permissions..."
+        sudo addgroup --system kvm
+        sudo adduser $USER kvm
+        sudo chown root:kvm /dev/kvm
+        sudo chmod 660 /dev/kvm
+    
     - name: Setup Android SDK
       run: |
         export ANDROID_HOME=/usr/local/lib/android/sdk
@@ -36,12 +52,10 @@ jobs:
         export ANDROID_AVD_HOME=$HOME/.android/avd
         export PATH=$PATH:$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools:$ANDROID_HOME/emulator
         
-        # Accept all licenses first
         mkdir -p $ANDROID_HOME/licenses
         echo "24333f8a63b6825ea9c5514f83c2829b004d1fee" > $ANDROID_HOME/licenses/android-sdk-license
         echo "d56f5187479451eabf01fb78af6dfcb131a6481e" >> $ANDROID_HOME/licenses/android-sdk-license
         
-        # Install required packages
         yes | sdkmanager --licenses
         sdkmanager --install "platform-tools" \
                             "platforms;android-30" \
@@ -62,10 +76,9 @@ jobs:
         export ANDROID_AVD_HOME=$HOME/.android/avd
         export PATH=$PATH:$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools:$ANDROID_HOME/emulator
         
-        # Create AVD directory
         mkdir -p $ANDROID_AVD_HOME
         
-        # Create AVD
+        echo "Creating AVD..."
         echo "no" | avdmanager --verbose create avd \
           --force \
           --name "test_avd" \
@@ -73,24 +86,30 @@ jobs:
           --tag "google_apis" \
           --abi "x86_64"
         
-        # Start emulator
+        echo "Starting emulator..."
         nohup $ANDROID_HOME/emulator/emulator \
           -avd test_avd \
           -no-window \
-          -gpu swiftshader_indirect \
+          -gpu swiftshader \
           -no-snapshot \
           -no-audio \
           -no-boot-anim \
           -camera-back none \
           -camera-front none \
           -memory 2048 \
-          -accel on \
-          -qemu -cpu host &
+          -accel auto \
+          -cores 2 &
         
-        # Wait for device to be ready
+        echo "Waiting for emulator to start..."
         adb wait-for-device
-        adb shell 'while [[ -z $(getprop sys.boot_completed) ]]; do sleep 2; done'
-        sleep 30
+        
+        echo "Waiting for boot completion..."
+        timeout 300 adb shell 'while [[ -z $(getprop sys.boot_completed) ]]; do sleep 2; done'
+        
+        echo "Device status:"
+        adb devices -l
+        
+        echo "Emulator started successfully"
     
     - name: Start Appium Server
       run: |
